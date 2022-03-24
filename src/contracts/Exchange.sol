@@ -37,6 +37,7 @@ contract Exchange {
 
 	//Events
 	event Deposit(address token, address user, uint256 amount, uint256 balance);
+	event Withdraw(address token,  address user, uint amount, uint balance);
 
 
 
@@ -58,6 +59,14 @@ contract Exchange {
 	  }
 
 
+	  function withdrawEther(uint _amount) public {
+	  require(tokens[ETHER][msg.sender] >= _amount);
+	  tokens[ETHER][msg.sender] = tokens[ETHER][msg.sender].sub(_amount);
+	  msg.sender.transfer(_amount);
+	  emit Withdraw(ETHER, msg.sender, _amount, tokens[ETHER][msg.sender]);
+	  }
+
+
 
 	function depositToken(address _token, uint _amount) public {
 	//ToDo: Don't allow Eth deposits
@@ -74,6 +83,20 @@ contract Exchange {
 
 
 	}
+
+
+	function withdrawToken(address _token, uint256 _amount) public {
+		require(_token != ETHER);
+		require(tokens[_token][msg.sender] >= _amount);
+		tokens[_token][msg.sender] = tokens[_token][msg.sender].sub(_amount);
+		require(Token(_token).transfer(msg.sender, _amount));
+		emit Withdraw(_token, msg.sender, _amount, tokens[_token][msg.sender]);
+	}
+
+	function balanceOf(address _token, address _user) public view returns (uint256) {
+		return tokens[_token][_user];
+	}
+
 
 }
 
